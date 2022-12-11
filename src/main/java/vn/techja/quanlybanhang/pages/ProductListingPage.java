@@ -1,0 +1,63 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package vn.techja.quanlybanhang.pages;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import vn.techja.quanlybanhang.entities.Product;
+import vn.techja.quanlybanhang.service.ProductService;
+import vn.techja.quanlybanhang.service.ProductServiceImpl;
+import vn.techja.quanlybanhang.ui.TableUI;
+import vn.techja.quanlybanhang.utilities.I18n;
+import vn.techja.quanlybanhang.utilities.PaginatedResults;
+
+public class ProductListingPage extends Page {
+
+    @Override
+    public void displayContent() {
+
+        ProductService productService = new ProductServiceImpl();
+
+        int page = 1;
+
+        try {
+            do {
+
+                PaginatedResults<Product> results = productService.select(page);
+
+                if (results.getResults().isEmpty()) {
+                    I18n.printEntityMessage("product", "entity.msg.emptyResults");
+                    return;
+                }
+
+                TableUI theTable = Product.toTable(results.getResults());
+                theTable.display(); //table
+
+                if (results.needsPagination()) {
+                    results.displayPagination(); //pagination
+                    results.displayPaginationMenu(); //pagination menu
+
+                    page = results.scanGoPage();
+
+                    System.out.println("");
+                } else {
+                    page = 0;
+                }
+
+            } while (page > 0);
+
+        } catch (Exception ex) {
+            Logger.getLogger(ProductListingPage.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    @Override
+    public String getTitle() {
+        return I18n.getEntityMessage("product", "entity.title.all", true);
+    }
+
+}
